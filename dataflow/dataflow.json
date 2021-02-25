@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText3",
+						"referenceName": "Storage_Account",
 						"type": "DatasetReference"
 					},
 					"name": "source"

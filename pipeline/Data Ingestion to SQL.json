@@ -7,7 +7,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "Truncate stage table",
+						"activity": "Truncate Stage Table",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -61,8 +61,8 @@
 				}
 			},
 			{
-				"name": "Truncate stage table",
-				"type": "Lookup",
+				"name": "Truncate Stage Table",
+				"type": "SqlServerStoredProcedure",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -73,16 +73,11 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "truncate table [stg].[Customer]",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "AzureSqlTable1",
-						"type": "DatasetReference"
-					}
+					"storedProcedureName": "[stg].[Truncate_Customer]"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
