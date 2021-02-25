@@ -10,6 +10,10 @@
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
 		}
 	},
 	"variables": {
@@ -52,6 +56,92 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Customer_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Customer_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Customer_Open_Date",
+						"type": "date"
+					},
+					{
+						"name": "Last_Consulted_Date",
+						"type": "date"
+					},
+					{
+						"name": "Vaccination_Type",
+						"type": "char"
+					},
+					{
+						"name": "Doctor_Consulted",
+						"type": "char"
+					},
+					{
+						"name": "State",
+						"type": "char"
+					},
+					{
+						"name": "Country",
+						"type": "char"
+					},
+					{
+						"name": "Post_Code",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Date_of_Birth",
+						"type": "date"
+					},
+					{
+						"name": "Active_Customer",
+						"type": "char"
+					}
+				],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "Customer"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
 			]
 		},
 		{
@@ -115,6 +205,83 @@
 					"quoteChar": "\""
 				},
 				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText3')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "data001.txt",
+						"container": "data"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Prop_0",
+						"type": "String"
+					},
+					{
+						"name": "H",
+						"type": "String"
+					},
+					{
+						"name": "Customer_Name",
+						"type": "String"
+					},
+					{
+						"name": "Customer_Id",
+						"type": "String"
+					},
+					{
+						"name": "Open_Date",
+						"type": "String"
+					},
+					{
+						"name": "Last_Consulted_Date",
+						"type": "String"
+					},
+					{
+						"name": "Vaccination_Id",
+						"type": "String"
+					},
+					{
+						"name": "Dr_Name",
+						"type": "String"
+					},
+					{
+						"name": "State",
+						"type": "String"
+					},
+					{
+						"name": "Country",
+						"type": "String"
+					},
+					{
+						"name": "DOB",
+						"type": "String"
+					},
+					{
+						"name": "Is_Active",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
@@ -192,6 +359,118 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('factoryId'), '/datasets/DelimitedText2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText3",
+								"type": "DatasetReference"
+							},
+							"name": "source"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference"
+							},
+							"name": "sink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SelectColumns"
+						},
+						{
+							"name": "DerivedColumn"
+						}
+					],
+					"script": "source(output(\n\t\tProp_0 as string,\n\t\tH as string,\n\t\tCustomer_Name as string,\n\t\tCustomer_Id as string,\n\t\tOpen_Date as string,\n\t\tLast_Consulted_Date as string,\n\t\tVaccination_Id as string,\n\t\tDr_Name as string,\n\t\tState as string,\n\t\tCountry as string,\n\t\tDOB as string,\n\t\tIs_Active as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source\nsource select(mapColumn(\n\t\tCustomer_Name,\n\t\tCustomer_Id,\n\t\tOpen_Date,\n\t\tLast_Consulted_Date,\n\t\tVaccination_Id,\n\t\tDr_Name,\n\t\tState,\n\t\tCountry,\n\t\tDOB,\n\t\tIs_Active\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectColumns\nSelectColumns derive(Open_Date = toDate(concat(substring(Open_Date,1,4),'-',substring(Open_Date,5,2),'-',substring(Open_Date,7,2)) , 'yyyy-MM-dd'),\n\t\tLast_Consulted_Date = toDate(concat(substring(Last_Consulted_Date,1,4),'-',substring(Last_Consulted_Date,5,2),'-',substring(Last_Consulted_Date,7,2)) , 'yyyy-MM-dd'),\n\t\tDOB = toDate(concat(substring(DOB,5,4),'-',substring(DOB,3,2),'-',substring(DOB,1,2)) , 'yyyy-MM-dd')) ~> DerivedColumn\nDerivedColumn sink(input(\n\t\tCustomer_Name as string,\n\t\tCustomer_ID as string,\n\t\tCustomer_Open_Date as date,\n\t\tLast_Consulted_Date as date,\n\t\tVaccination_Type as string,\n\t\tDoctor_Consulted as string,\n\t\tState as string,\n\t\tCountry as string,\n\t\tPost_Code as integer,\n\t\tDate_of_Birth as date,\n\t\tActive_Customer as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tCustomer_Name,\n\t\tCustomer_ID = Customer_Id,\n\t\tCustomer_Open_Date = Open_Date,\n\t\tLast_Consulted_Date,\n\t\tVaccination_Type = Vaccination_Id,\n\t\tDoctor_Consulted = Dr_Name,\n\t\tState,\n\t\tCountry,\n\t\tDate_of_Birth = DOB,\n\t\tActive_Customer = Is_Active\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedText3')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source": {},
+									"sink": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Stored procedure",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Data flow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dm].[Divide_Customer_Based_On_Country]"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase1",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
 			]
 		}
 	]
