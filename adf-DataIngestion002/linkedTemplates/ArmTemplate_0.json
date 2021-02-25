@@ -211,7 +211,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DelimitedText3')]",
+			"name": "[concat(parameters('factoryName'), '/Storage_Account')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -409,7 +409,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "DelimitedText3",
+								"referenceName": "Storage_Account",
 								"type": "DatasetReference"
 							},
 							"name": "source"
@@ -436,7 +436,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DelimitedText3')]",
+				"[concat(variables('factoryId'), '/datasets/Storage_Account')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
 			]
 		},
@@ -451,7 +451,7 @@
 						"type": "ExecuteDataFlow",
 						"dependsOn": [
 							{
-								"activity": "Truncate stage table",
+								"activity": "Truncate Stage Table",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -511,8 +511,8 @@
 						}
 					},
 					{
-						"name": "Truncate stage table",
-						"type": "Lookup",
+						"name": "Truncate Stage Table",
+						"type": "SqlServerStoredProcedure",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
@@ -523,17 +523,11 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "truncate table [stg].[Customer]",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "AzureSqlTable1",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
+							"storedProcedureName": "[[stg].[Truncate_Customer]"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase1",
+							"type": "LinkedServiceReference"
 						}
 					}
 				],
@@ -541,8 +535,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/dataflow')]",
-				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
 			]
 		}
 	]
