@@ -1,0 +1,72 @@
+{
+	"name": "DelimitedText3",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "data001.txt",
+				"container": "data"
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Prop_0",
+				"type": "String"
+			},
+			{
+				"name": "H",
+				"type": "String"
+			},
+			{
+				"name": "Customer_Name",
+				"type": "String"
+			},
+			{
+				"name": "Customer_Id",
+				"type": "String"
+			},
+			{
+				"name": "Open_Date",
+				"type": "String"
+			},
+			{
+				"name": "Last_Consulted_Date",
+				"type": "String"
+			},
+			{
+				"name": "Vaccination_Id",
+				"type": "String"
+			},
+			{
+				"name": "Dr_Name",
+				"type": "String"
+			},
+			{
+				"name": "State",
+				"type": "String"
+			},
+			{
+				"name": "Country",
+				"type": "String"
+			},
+			{
+				"name": "DOB",
+				"type": "String"
+			},
+			{
+				"name": "Is_Active",
+				"type": "String"
+			}
+		]
+	}
+}

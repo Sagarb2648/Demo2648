@@ -1,0 +1,35 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText3",
+						"type": "DatasetReference"
+					},
+					"name": "source"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
+					"name": "sink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SelectColumns"
+				},
+				{
+					"name": "DerivedColumn"
+				}
+			],
+			"script": "source(output(\n\t\tProp_0 as string,\n\t\tH as string,\n\t\tCustomer_Name as string,\n\t\tCustomer_Id as string,\n\t\tOpen_Date as string,\n\t\tLast_Consulted_Date as string,\n\t\tVaccination_Id as string,\n\t\tDr_Name as string,\n\t\tState as string,\n\t\tCountry as string,\n\t\tDOB as string,\n\t\tIs_Active as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source\nsource select(mapColumn(\n\t\tCustomer_Name,\n\t\tCustomer_Id,\n\t\tOpen_Date,\n\t\tLast_Consulted_Date,\n\t\tVaccination_Id,\n\t\tDr_Name,\n\t\tState,\n\t\tCountry,\n\t\tDOB,\n\t\tIs_Active\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectColumns\nSelectColumns derive(Open_Date = toDate(concat(substring(Open_Date,1,4),'-',substring(Open_Date,5,2),'-',substring(Open_Date,7,2)) , 'yyyy-MM-dd'),\n\t\tLast_Consulted_Date = toDate(concat(substring(Last_Consulted_Date,1,4),'-',substring(Last_Consulted_Date,5,2),'-',substring(Last_Consulted_Date,7,2)) , 'yyyy-MM-dd'),\n\t\tDOB = toDate(concat(substring(DOB,5,4),'-',substring(DOB,3,2),'-',substring(DOB,1,2)) , 'yyyy-MM-dd')) ~> DerivedColumn\nDerivedColumn sink(input(\n\t\tCustomer_Name as string,\n\t\tCustomer_ID as string,\n\t\tCustomer_Open_Date as date,\n\t\tLast_Consulted_Date as date,\n\t\tVaccination_Type as string,\n\t\tDoctor_Consulted as string,\n\t\tState as string,\n\t\tCountry as string,\n\t\tPost_Code as integer,\n\t\tDate_of_Birth as date,\n\t\tActive_Customer as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tCustomer_Name,\n\t\tCustomer_ID = Customer_Id,\n\t\tCustomer_Open_Date = Open_Date,\n\t\tLast_Consulted_Date,\n\t\tVaccination_Type = Vaccination_Id,\n\t\tDoctor_Consulted = Dr_Name,\n\t\tState,\n\t\tCountry,\n\t\tDate_of_Birth = DOB,\n\t\tActive_Customer = Is_Active\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink"
+		}
+	}
+}

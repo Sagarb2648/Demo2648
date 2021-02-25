@@ -1,0 +1,62 @@
+{
+	"name": "AzureSqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Customer_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "Customer_ID",
+				"type": "varchar"
+			},
+			{
+				"name": "Customer_Open_Date",
+				"type": "date"
+			},
+			{
+				"name": "Last_Consulted_Date",
+				"type": "date"
+			},
+			{
+				"name": "Vaccination_Type",
+				"type": "char"
+			},
+			{
+				"name": "Doctor_Consulted",
+				"type": "char"
+			},
+			{
+				"name": "State",
+				"type": "char"
+			},
+			{
+				"name": "Country",
+				"type": "char"
+			},
+			{
+				"name": "Post_Code",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Date_of_Birth",
+				"type": "date"
+			},
+			{
+				"name": "Active_Customer",
+				"type": "char"
+			}
+		],
+		"typeProperties": {
+			"schema": "stg",
+			"table": "Customer"
+		}
+	}
+}
